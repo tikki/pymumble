@@ -22,7 +22,7 @@ class Commands:
         self.lock.acquire()
 
         self.id += 1
-        cmd.msg_id = self.id
+        cmd.cmd_id = self.id
         self.queue.appendleft(cmd)
         cmd.lock.acquire()
 
