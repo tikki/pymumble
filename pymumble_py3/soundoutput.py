@@ -269,9 +269,11 @@ class SoundOutput:
         if not target_id:
             return
         if type(target_id) is int:
-            targets = [typing.cast(int, target_id)]
+            targets = [{"session": [typing.cast(int, target_id)]}]
         else:
-            targets = typing.cast(typing.List[int], target_id)
+            targets = [
+                {"session": [tid]} for tid in typing.cast(typing.List[int], target_id)
+            ]
         self.target = 2
         if channel:
             self.target = 1
