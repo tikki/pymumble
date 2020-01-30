@@ -255,7 +255,9 @@ class SoundOutput:
             return
 
         if self.codec.opus:
-            self.encoder = opuslib.Encoder(PYMUMBLE_SAMPLERATE, 1, self.opus_profile)
+            self.encoder = opuslib.Encoder(
+                PYMUMBLE_SAMPLERATE, PYMUMBLE_CHANNELS, self.opus_profile
+            )
             self.encoder_framesize = self.audio_per_packet
             self.codec_type = PYMUMBLE_AUDIO_TYPE_OPUS
         else:
