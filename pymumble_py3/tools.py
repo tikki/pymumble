@@ -20,9 +20,9 @@ class VarInt:
 
         if self.value < 0:
             if self.value >= -3:
-                return struct.pack("!B", (0b11111100 | value))
+                return result + struct.pack("!B", (0b11111100 | value))
             else:
-                result = struct.pack("!B", 0b11111000)
+                result += struct.pack("!B", 0b11111000)
 
         if value <= 0x7F:
             return result + struct.pack("!B", value)

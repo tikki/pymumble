@@ -141,7 +141,7 @@ class SoundOutput:
                         audio_encoded < self.audio_per_packet and len(self.pcm) > 0
                     ):  # if not last frame for the packet, set the terminator bit
                         encoded_len += 1 << 7
-                    frameheader = struct.pack("!B", encoded_len)
+                    frameheader = bytearray(struct.pack("!B", encoded_len))
 
                 payload += frameheader + encoded  # add the frame to the packet
 
