@@ -41,7 +41,7 @@ class VarInt:
         """Decode a VarInt contained in a binary string, returning an integer"""
         varint = value
         is_negative = False
-        result = None
+        result = 0
         size = 0
 
         if len(varint) <= 0:
@@ -95,6 +95,8 @@ class VarInt:
                 raise InvalidVarInt("Too short 9 bytes varint")
             (result,) = struct.unpack("!Q", varint[1:9])
             size += 9
+        else:
+            return size
 
         if is_negative:
             self.value = -result

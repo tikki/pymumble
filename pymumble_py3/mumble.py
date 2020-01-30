@@ -202,7 +202,7 @@ class Mumble(threading.Thread):
             )
         try:
             self.control_socket.connect((self.host, self.port))
-            self.control_socket.setblocking(0)
+            self.control_socket.setblocking(False)
 
             # Perform the Mumble authentication
             version = mumble_pb2.Version()
