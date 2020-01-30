@@ -29,6 +29,7 @@ PYMUMBLE_OS_VERSION_STRING = "Python %s - %s %s" % (
 PYMUMBLE_PING_DELAY = 10  # interval between 2 pings in sec
 
 PYMUMBLE_SAMPLERATE = 48000  # in hz
+PYMUMBLE_CHANNELS = 1  # channel count
 
 PYMUMBLE_SEQUENCE_DURATION = float(10) / 1000  # in sec
 PYMUMBLE_SEQUENCE_RESET_INTERVAL = 5  # in sec
