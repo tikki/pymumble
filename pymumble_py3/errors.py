@@ -78,7 +78,7 @@ class TextTooLongError(Exception):
         self.value = value
 
     def __str__(self):
-        return 'Maximum Text allowed length: {}'.format(self.value)
+        return "Maximum Text allowed length: {}".format(self.value)
 
 
 class ImageTooBigError(Exception):
@@ -88,4 +88,4 @@ class ImageTooBigError(Exception):
         self.value = value
 
     def __str__(self):
-        return 'Maximum Text/Image allowed length: {}'.format(self.value)
+        return "Maximum Text/Image allowed length: {}".format(self.value)
