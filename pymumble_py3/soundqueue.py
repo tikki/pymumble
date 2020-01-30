@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import time
+import typing
 from collections import deque
 from threading import Lock
 
 import opuslib
 
 from .constants import *
+from .mumble import Mumble
 
 
 class SoundQueue:
@@ -14,12 +16,12 @@ class SoundQueue:
     Takes care of the decoding of the received audio
     """
 
-    def __init__(self, mumble_object):
+    def __init__(self, mumble_object: Mumble):
         self.mumble_object = mumble_object
 
-        self.queue = deque()
-        self.start_sequence = None
-        self.start_time = None
+        self.queue: typing.Deque[SoundChunk] = deque()
+        self.start_sequence: typing.Optional[int] = None
+        self.start_time: typing.Optional[float] = None
 
         self.receive_sound = True
 
@@ -27,18 +29,20 @@ class SoundQueue:
 
         # to be sure, create every supported decoders for all users
         # sometime, clients still use a codec for a while after server request another...
-        self.decoders = {
+        self.decoders: typing.Dict[int, opuslib.Decoder] = {
             PYMUMBLE_AUDIO_TYPE_OPUS: opuslib.Decoder(PYMUMBLE_SAMPLERATE, 1)
         }
 
-    def set_receive_sound(self, value):
+    def set_receive_sound(self, value: bool) -> None:
         """Define if received sounds must be kept or discarded in this specific queue (user)"""
         if value:
             self.receive_sound = True
         else:
             self.receive_sound = False
 
-    def add(self, audio, sequence, type, target):
+    def add(
+        self, audio: bytes, sequence: int, type: int, target: int
+    ) -> typing.Optional["SoundChunk"]:
         """Add a new audio frame to the queue, after decoding"""
         if not self.receive_sound:
             return None
@@ -56,7 +60,7 @@ class SoundQueue:
             else:
                 # calculating position in current sequence
                 calculated_time = (
-                    self.start_time
+                    typing.cast(float, self.start_time)
                     + (sequence - self.start_sequence) * PYMUMBLE_SEQUENCE_DURATION
                 )
 
@@ -90,30 +94,33 @@ class SoundQueue:
                     seq=sequence, type=type, error=str(e)
                 )
             )
+        return None
 
-    def is_sound(self):
+    def is_sound(self) -> bool:
         """Boolean to check if there is a sound frame in the queue"""
         if len(self.queue) > 0:
             return True
         else:
             return False
 
-    def get_sound(self, duration=None):
+    def get_sound(
+        self, duration: typing.Optional[float] = None
+    ) -> typing.Optional["SoundChunk"]:
         """Return the first sound of the queue and discard it"""
         self.lock.acquire()
 
-        if len(self.queue) > 0:
-            if duration is None or self.first_sound().duration <= duration:
+        sound = self.first_sound()
+        result: typing.Optional["SoundChunk"] = None
+        if sound is not None:
+            if duration is None or sound.duration <= duration:
                 result = self.queue.pop()
             else:
-                result = self.first_sound().extract_sound(duration)
-        else:
-            result = None
+                result = sound.extract_sound(duration)
 
         self.lock.release()
         return result
 
-    def first_sound(self):
+    def first_sound(self) -> typing.Optional["SoundChunk"]:
         """Return the first sound of the queue, but keep it"""
         if len(self.queue) > 0:
             return self.queue[-1]
@@ -126,7 +133,14 @@ class SoundChunk:
     Object that contains the actual audio frame, in PCM format"""
 
     def __init__(
-        self, pcm, sequence, size, calculated_time, type, target, timestamp=time.time()
+        self,
+        pcm: bytes,
+        sequence: int,
+        size: int,
+        calculated_time: float,
+        type: int,
+        target: int,
+        timestamp: float = time.time(),
     ):
         self.timestamp = timestamp  # measured time of arrival of the sound
         self.time = calculated_time  # calculated time of arrival of the sound (based on sequence)
@@ -137,7 +151,7 @@ class SoundChunk:
         self.type = type  # type of the audio (codec)
         self.target = target  # target of the audio
 
-    def extract_sound(self, duration):
+    def extract_sound(self, duration: float) -> "SoundChunk":
         """Extract part of the chunk, leaving a valid chunk for the remaining part"""
         size = int(duration * 2 * PYMUMBLE_SAMPLERATE)
         result = SoundChunk(
