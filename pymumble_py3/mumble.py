@@ -588,7 +588,7 @@ class Mumble(threading.Thread):
                 size &= 0x1FFF  # isolate the size from the terminator
             else:
                 (header,) = struct.unpack(
-                    "!B", message[pos]
+                    "!B", message[pos : pos + 1]
                 )  # CELT length and terminator is encoded in a 1 byte int
                 if not (header & 0b10000000):
                     terminator = True
