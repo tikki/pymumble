@@ -10,10 +10,10 @@ class InvalidVarInt(Exception):
 class VarInt:
     """Implement the varint type used in mumble"""
 
-    def __init__(self, value=0):
+    def __init__(self, value: int = 0):
         self.value = value
 
-    def encode(self):
+    def encode(self) -> bytearray:
         """Encode an integer in the VarInt format, returning a binary string"""
         result = bytearray()
         value = abs(self.value)
@@ -37,7 +37,7 @@ class VarInt:
         else:
             return result + struct.pack("!BQ", 0b11110100, value)
 
-    def decode(self, value):
+    def decode(self, value: bytes) -> int:
         """Decode a VarInt contained in a binary string, returning an integer"""
         varint = value
         is_negative = False
@@ -104,7 +104,7 @@ class VarInt:
         return size
 
 
-def tohex(buffer):
+def tohex(buffer: str) -> str:
     """Used for debugging.  Output a sting in hex format"""
     result = "\n"
     cpt1 = 0
