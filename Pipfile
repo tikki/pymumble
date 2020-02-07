@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 opuslib = "==2.0.0"
-protobuf = "==3.4.0"
+protobuf = ">=3.4.0"
 
 [requires]
 python_version = "3.7"
