@@ -3,8 +3,10 @@ import struct
 import typing
 
 from .constants import *
-from .mumble import Mumble
 from .mumble_pb2 import RequestBlob
+
+if typing.TYPE_CHECKING:
+    from .mumble import Mumble
 
 
 class Blobs(typing.Dict[bytes, typing.Any]):
@@ -12,7 +14,7 @@ class Blobs(typing.Dict[bytes, typing.Any]):
     Manage the Blob library
     """
 
-    def __init__(self, mumble_object: Mumble):
+    def __init__(self, mumble_object: "Mumble"):
         self.mumble_object = mumble_object
 
     def get_user_comment(self, hash: bytes) -> None:

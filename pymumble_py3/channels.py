@@ -6,8 +6,10 @@ from . import messages
 from .callbacks import CallBacks
 from .constants import *
 from .errors import ImageTooBigError, TextTooLongError, UnknownChannelError
-from .mumble import Mumble
 from .users import User
+
+if typing.TYPE_CHECKING:
+    from .mumble import Mumble
 
 ProtoMessage = typing.Any
 
@@ -17,7 +19,7 @@ class Channels(typing.Dict[int, Channel]):
     Object that Stores all channels and their properties.
     """
 
-    def __init__(self, mumble_object: Mumble, callbacks: CallBacks):
+    def __init__(self, mumble_object: "Mumble", callbacks: CallBacks):
         self.mumble_object = mumble_object
         self.callbacks = callbacks
 
@@ -129,7 +131,7 @@ class Channel(typing.Dict[str, typing.Any]):
     Stores information about one specific channel
     """
 
-    def __init__(self, mumble_object: Mumble, message: ProtoMessage) -> None:
+    def __init__(self, mumble_object: "Mumble", message: ProtoMessage) -> None:
         self.mumble_object = mumble_object
         self["channel_id"] = message.channel_id
         self.update(message)
