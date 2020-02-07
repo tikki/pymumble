@@ -23,9 +23,15 @@
 # Works on MacOS. Does NOT work on RPi 3B+ (I cannot figure out why. Help will
 # be much appreciated)
 
+import typing
+
 import pyaudio
 import pymumble.pymumble_py3 as pymumble_py3
 from pymumble.pymumble_py3.callbacks import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
+
+if typing.TYPE_CHECKING:
+    from pymumble.pymumble_py3.users import User
+    from pymumble.pymumble_py3.soundqueue import SoundChunk
 
 # Connection details for mumble server. Harded code for now, will have to be
 # command line arguments eventually
@@ -51,9 +57,8 @@ stream = p.open(
     frames_per_buffer=CHUNK,
 )
 
-
 # mumble client set up
-def sound_received_handler(user, soundchunk):
+def sound_received_handler(user: "User", soundchunk: "SoundChunk") -> None:
     """ play sound received from mumble server upon its arrival """
     stream.write(soundchunk.pcm)
 
