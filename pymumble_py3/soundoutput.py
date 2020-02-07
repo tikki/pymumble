@@ -40,7 +40,7 @@ class SoundOutput:
 
         self.Log = self.mumble_object.Log
 
-        self.pcm: typing.List[bytearray] = []
+        self.pcm: typing.List[bytes] = []
         self.lock = threading.Lock()
 
         self.codec: typing.Optional[
@@ -215,7 +215,7 @@ class SoundOutput:
 
             self.encoder.bitrate = self.bandwidth - overhead_per_second
 
-    def add_sound(self, pcm: bytearray) -> None:
+    def add_sound(self, pcm: bytes) -> None:
         """add sound to be sent (in PCM mono 16 bits signed format)"""
         if len(pcm) % 2 != 0:  # check that the data is align on 16 bits
             raise Exception("pcm data must be mono 16 bits")
