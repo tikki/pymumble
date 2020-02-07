@@ -263,7 +263,10 @@ class Mumble(threading.Thread):
                         cmd
                     )  # send the commands coming from the application to the server
 
+                buffer_was_empty = len(self.sound_output.pcm) == 0
                 self.sound_output.send_audio()  # send outgoing audio if available
+                if not buffer_was_empty and len(self.sound_output.pcm) == 0:
+                    self.callbacks(PYMUMBLE_CLBK_BUFFERDEPLETED)
 
             (rlist, wlist, xlist) = select.select(
                 [self.control_socket], [], [self.control_socket], self.loop_rate

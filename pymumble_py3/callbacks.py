@@ -32,6 +32,7 @@ class CallBacks(typing.Dict[str, typing.Optional[_Callbacks]]):
                 PYMUMBLE_CLBK_SOUNDRECEIVED: None,  # send the user object that received the sound and the SoundChunk object itself
                 PYMUMBLE_CLBK_TEXTMESSAGERECEIVED: None,  # Send the received message
                 PYMUMBLE_CLBK_CONTEXTACTIONRECEIVED: None,  # Send the contextaction message
+                PYMUMBLE_CLBK_BUFFERDEPLETED: None,  # Triggered once the sound output buffer goes empty
             }
         )
 
