@@ -11,8 +11,10 @@ import opuslib
 from .constants import *
 from .errors import CodecNotSupportedError
 from .messages import VoiceTarget
-from .mumble import Mumble
 from .tools import VarInt
+
+if typing.TYPE_CHECKING:
+    from .mumble import Mumble
 
 ProtoMessage = typing.Any
 
@@ -25,7 +27,7 @@ class SoundOutput:
 
     def __init__(
         self,
-        mumble_object: Mumble,
+        mumble_object: "Mumble",
         audio_per_packet: float,
         bandwidth: int,
         opus_profile: str = PYMUMBLE_AUDIO_TYPE_OPUS_PROFILE,

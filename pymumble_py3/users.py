@@ -6,7 +6,9 @@ from . import messages, mumble_pb2, soundqueue
 from .callbacks import CallBacks
 from .constants import *
 from .errors import ImageTooBigError, TextTooLongError
-from .mumble import Mumble
+
+if typing.TYPE_CHECKING:
+    from .mumble import Mumble
 
 ProtoMessage = typing.Any
 
@@ -14,7 +16,7 @@ ProtoMessage = typing.Any
 class Users(typing.Dict[int, User]):
     """Object that stores and update all connected users"""
 
-    def __init__(self, mumble_object: Mumble, callbacks: CallBacks):
+    def __init__(self, mumble_object: "Mumble", callbacks: CallBacks):
         self.mumble_object = mumble_object
         self.callbacks = callbacks
 
@@ -66,7 +68,7 @@ class Users(typing.Dict[int, User]):
 class User(typing.Dict[str, typing.Any]):
     """Object that store one user"""
 
-    def __init__(self, mumble_object: Mumble, message: ProtoMessage):
+    def __init__(self, mumble_object: "Mumble", message: ProtoMessage):
         self.mumble_object = mumble_object
         self["session"] = message.session
         self["channel_id"] = 0

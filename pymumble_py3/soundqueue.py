@@ -7,7 +7,9 @@ from threading import Lock
 import opuslib
 
 from .constants import *
-from .mumble import Mumble
+
+if typing.TYPE_CHECKING:
+    from .mumble import Mumble
 
 
 class SoundQueue:
@@ -16,7 +18,7 @@ class SoundQueue:
     Takes care of the decoding of the received audio
     """
 
-    def __init__(self, mumble_object: Mumble):
+    def __init__(self, mumble_object: "Mumble"):
         self.mumble_object = mumble_object
 
         self.queue: typing.Deque[SoundChunk] = deque()
