@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
 ProtoMessage = typing.Any
 
 
-class Channels(typing.Dict[int, Channel]):
+class Channels(typing.Dict[int, "Channel"]):
     """
     Object that Stores all channels and their properties.
     """
@@ -51,7 +51,7 @@ class Channels(typing.Dict[int, Channel]):
 
         self.lock.release()
 
-    def find_by_tree(self, tree: typing.Iterable[str]) -> Channel:
+    def find_by_tree(self, tree: typing.Iterable[str]) -> "Channel":
         """Find a channel by its full path (a list with an element for each leaf)"""
         if not getattr(tree, "__iter__", False):
             tree = tree  # function use argument as a list
@@ -72,7 +72,7 @@ class Channels(typing.Dict[int, Channel]):
 
         return current
 
-    def get_childs(self, channel: Channel) -> typing.List[Channel]:
+    def get_childs(self, channel: "Channel") -> typing.List["Channel"]:
         """Get the child channels of a channel in a list"""
         childs = list()
 
@@ -82,7 +82,9 @@ class Channels(typing.Dict[int, Channel]):
 
         return childs
 
-    def get_descendants(self, channel: Channel) -> typing.List[typing.List[Channel]]:
+    def get_descendants(
+        self, channel: "Channel"
+    ) -> typing.List[typing.List["Channel"]]:
         """Get all the descendant of a channel, in nested lists"""
         descendants = list()
 
@@ -91,7 +93,7 @@ class Channels(typing.Dict[int, Channel]):
 
         return descendants
 
-    def get_tree(self, channel: Channel) -> typing.List[Channel]:
+    def get_tree(self, channel: "Channel") -> typing.List["Channel"]:
         """Get the whole list of channels, in a multidimensional list"""
         tree: typing.List[Channel] = list()
 
@@ -105,7 +107,7 @@ class Channels(typing.Dict[int, Channel]):
 
         return tree
 
-    def find_by_name(self, name: str) -> Channel:
+    def find_by_name(self, name: str) -> "Channel":
         """Find a channel by name.  Stop on the first that match"""
         if name == "":
             return self[0]

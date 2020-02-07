@@ -13,7 +13,7 @@ if typing.TYPE_CHECKING:
 ProtoMessage = typing.Any
 
 
-class Users(typing.Dict[int, User]):
+class Users(typing.Dict[int, "User"]):
     """Object that stores and update all connected users"""
 
     def __init__(self, mumble_object: "Mumble", callbacks: CallBacks):
@@ -21,7 +21,7 @@ class Users(typing.Dict[int, User]):
         self.callbacks = callbacks
 
         self.myself: typing.Optional[
-            User
+            "User"
         ] = None  # user object of the pymumble thread itself
         self.myself_session: typing.Optional[
             int
