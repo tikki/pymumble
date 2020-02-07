@@ -1,0 +1,13 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+opuslib = "==2.0.0"
+protobuf = "==3.4.0"
+
+[requires]
+python_version = "3.7"
