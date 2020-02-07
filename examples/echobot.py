@@ -6,7 +6,7 @@ import time
 import typing
 
 import pymumble_py3
-from pymumble_py3.callbacks import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
+from pymumble_py3.constants import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
 
 if typing.TYPE_CHECKING:
     from pymumble.pymumble_py3.users import User
@@ -24,7 +24,7 @@ def sound_received_handler(user: "User", soundchunk: "SoundChunk") -> None:
 
 mumble = pymumble_py3.Mumble(server, nick, password=pwd)
 mumble.callbacks.set_callback(PCS, sound_received_handler)
-mumble.set_receive_sound(1)  # we want to receive sound
+mumble.set_receive_sound(True)  # we want to receive sound
 mumble.start()
 
 while 1:
