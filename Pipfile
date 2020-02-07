@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pymumble = {editable = true,path = "."}
 
 [packages]
 opuslib = "==2.0.0"

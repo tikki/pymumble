@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4f93e5d060732262df18a5be60806b273317f08101a787d3bff6aecc2ad1e2d4"
+            "sha256": "604f74f241f39e4b7093bb60eeff3ed964f71ebae72e403a08d6b6bcfffd0f1d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -55,5 +55,10 @@
             "version": "==1.14.0"
         }
     },
-    "develop": {}
+    "develop": {
+        "pymumble": {
+            "editable": true,
+            "path": "."
+        }
+    }
 }
