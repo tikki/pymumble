@@ -3,16 +3,21 @@
 # WARNING! Don't put two bots in the same place!
 
 import time
+import typing
 
 import pymumble_py3
 from pymumble_py3.callbacks import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
+
+if typing.TYPE_CHECKING:
+    from pymumble.pymumble_py3.users import User
+    from pymumble.pymumble_py3.soundqueue import SoundChunk
 
 pwd = ""  # password
 server = "localhost"
 nick = "Bob"
 
 
-def sound_received_handler(user, soundchunk):
+def sound_received_handler(user: "User", soundchunk: "SoundChunk") -> None:
     # sending the received sound back to server
     mumble.sound_output.add_sound(soundchunk.pcm)
 

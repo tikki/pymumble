@@ -25,7 +25,7 @@ while s:
     wave_file = sp.Popen(command, stdout=sp.PIPE).stdout
     # converting the wave speech to pcm
     command = ["ffmpeg", "-i", "-", "-ac", "1", "-f", "s32le", "-"]
-    sound = sp.Popen(
+    sound = sp.Popen(  # type: ignore
         command, stdout=sp.PIPE, stderr=sp.DEVNULL, stdin=wave_file
     ).stdout.read()
     # sending speech to server
