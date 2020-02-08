@@ -8,7 +8,7 @@ pymumble = {editable = true,path = "."}
 mypy-protobuf = "*"
 
 [packages]
-opuslib = "==2.0.0"
+opuslib = ">=3.0.0"
 protobuf = ">=3.4.0"
 
 [requires]

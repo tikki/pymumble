@@ -128,7 +128,7 @@ class SoundOutput:
 
                 try:
                     encoded = self.encoder.encode(to_encode, len(to_encode) // 2)
-                except opuslib.exceptions.OpusError:
+                except opuslib.OpusError:
                     encoded = b""
 
                 audio_encoded += self.encoder_framesize
