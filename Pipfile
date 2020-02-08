@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pymumble = {editable = true,path = "."}
+mypy-protobuf = "*"
 
 [packages]
 opuslib = "==2.0.0"

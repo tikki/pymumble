@@ -1,7 +1,7 @@
 
 all: build
 
-build: pymumble_py3/mumble_pb2.py
+build: pymumble_py3/mumble_pb2.py pymumble_py3/mumble_pb2.pyi
 
 clean:
 	rm -rf build
@@ -15,10 +15,13 @@ build/Mumble.proto:
 	mkdir -p $(@D)
 	curl -sLo $@ $(PROTOFILE_URL)
 
-build/Mumble_pb2.py: build/Mumble.proto
-	protoc --python_out=. $<  # protoc automatically dumps to a "build" subdir
+build/Mumble_pb2.py build/Mumble_pb2.pyi: build/Mumble.proto
+	protoc --python_out=. --mypy_out=. $<  # protoc automatically dumps to a "build" subdir
 
 pymumble_py3/mumble_pb2.py: build/Mumble_pb2.py
 	cp -f $< $@
 
-.INTERMEDIATE: build/Mumble_pb2.py
+pymumble_py3/mumble_pb2.pyi: build/Mumble_pb2.pyi
+	cp -f $< $@
+
+.INTERMEDIATE: build/Mumble_pb2.py build/Mumble_pb2.pyi
