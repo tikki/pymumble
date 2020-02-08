@@ -15,7 +15,7 @@ build/Mumble.proto:
 	mkdir -p $(@D)
 	curl -sLo $@ $(PROTOFILE_URL)
 
-build/Mumble_pb2.py build/Mumble_pb2.pyi: build/Mumble.proto
+build/Mumble_pb2.py build/Mumble_pb2.pyi &: build/Mumble.proto
 	protoc --python_out=. --mypy_out=. $<  # protoc automatically dumps to a "build" subdir
 
 pymumble_py3/mumble_pb2.py: build/Mumble_pb2.py
