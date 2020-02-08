@@ -272,16 +272,12 @@ class SoundOutput:
     ) -> None:
         if not target_id:
             return
-        if type(target_id) is int:
-            targets = [{"session": [typing.cast(int, target_id)]}]
-        else:
-            targets = [
-                {"session": [tid]} for tid in typing.cast(typing.List[int], target_id)
-            ]
+        if isinstance(target_id, int):
+            target_id = [target_id]
         self.target = 2
         if channel:
             self.target = 1
-        cmd = VoiceTarget(self.target, targets)
+        cmd = VoiceTarget(self.target, target_id)
         self.mumble_object.execute_command(cmd)
 
     def remove_whisper(self) -> None:
