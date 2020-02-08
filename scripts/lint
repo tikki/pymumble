@@ -38,6 +38,6 @@ isort $ISORT_OPTS --atomic --combine-as --trailing-comma --multi-line=3 \
     --virtual-env "$VIRTUAL_ENV" \
     --skip 'mumble_pb2.py' --skip 'mumble_pb2.pyi' \
     $SOURCE_DIR
-black $BLACK_OPTS --target-version py37 \
+black $BLACK_OPTS --target-version py36 \
     --exclude '/mumble_pb2\.pyi?' \
     $SOURCE_DIR
