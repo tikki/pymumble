@@ -85,9 +85,7 @@ class RemoveChannel(Cmd):
 class VoiceTarget(Cmd):
     """Command to create a whisper"""
 
-    def __init__(
-        self, voice_id: int, targets: typing.Sequence[typing.Mapping[str, typing.Any]]
-    ) -> None:
+    def __init__(self, voice_id: int, targets: typing.Sequence[int]) -> None:
         Cmd.__init__(self)
 
         self.cmd = PYMUMBLE_MSG_TYPES_VOICETARGET
