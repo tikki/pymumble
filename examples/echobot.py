@@ -9,8 +9,8 @@ import pymumble_py3
 from pymumble_py3.constants import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
 
 if typing.TYPE_CHECKING:
-    from pymumble.pymumble_py3.users import User
-    from pymumble.pymumble_py3.soundqueue import SoundChunk
+    from pymumble_py3.users import User
+    from pymumble_py3.soundqueue import SoundChunk
 
 pwd = ""  # password
 server = "localhost"
