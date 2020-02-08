@@ -67,7 +67,7 @@ def sound_received_handler(user: "User", soundchunk: "SoundChunk") -> None:
 mumble = pymumble_py3.Mumble(server, nick, password=pwd, port=port)
 # set up callback called when PCS event occurs
 mumble.callbacks.set_callback(PCS, sound_received_handler)
-mumble.set_receive_sound(1)  # Enable receiving sound from mumble server
+mumble.set_receive_sound(True)  # Enable receiving sound from mumble server
 mumble.start()
 mumble.is_ready()  # Wait for client is ready
 
