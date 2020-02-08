@@ -1,0 +1,43 @@
+#!/bin/sh -e
+
+cd "${RUN_DIR:-$(dirname "$(dirname "$(realpath "$0")")")}"
+
+if [ "$1" = '--fix' ]; then
+    MODE=fix
+else
+    MODE=check
+fi
+
+if [ -z "$VIRTUAL_ENV" ]; then
+    VIRTUAL_ENV=$(pipenv --venv)
+fi
+
+if [ -z "$PYTHON_BIN" ]; then
+    PYTHON_BIN=$(pipenv --py)
+fi
+
+SOURCE_DIR='pymumble_py3 examples'
+
+FLAKE_OPTS=--check
+ISORT_OPTS=--check-only
+BLACK_OPTS=--check
+
+if [ "$MODE" = 'fix' ]; then
+    FLAKE_OPTS=--in-place
+    ISORT_OPTS=--apply
+    BLACK_OPTS=
+fi
+
+set -x
+
+# Python
+mypy --strict --python-executable "$PYTHON_BIN" $SOURCE_DIR
+autoflake $FLAKE_OPTS --recursive $SOURCE_DIR
+isort $ISORT_OPTS --atomic --combine-as --trailing-comma --multi-line=3 \
+    --line-width 88 --force-grid-wrap 0 --recursive \
+    --virtual-env "$VIRTUAL_ENV" \
+    --skip 'mumble_pb2.py' --skip 'mumble_pb2.pyi' \
+    $SOURCE_DIR
+black $BLACK_OPTS --target-version py37 \
+    --exclude '/mumble_pb2\.pyi?' \
+    $SOURCE_DIR
