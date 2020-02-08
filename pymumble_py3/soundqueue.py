@@ -39,10 +39,7 @@ class SoundQueue:
 
     def set_receive_sound(self, value: bool) -> None:
         """Define if received sounds must be kept or discarded in this specific queue (user)"""
-        if value:
-            self.receive_sound = True
-        else:
-            self.receive_sound = False
+        self.receive_sound = value
 
     def add(
         self, audio: bytes, sequence: int, type: int, target: int

@@ -250,6 +250,8 @@ class Mumble(threading.Thread):
             not in (PYMUMBLE_CONN_STATE_NOT_CONNECTED, PYMUMBLE_CONN_STATE_FAILED)
             and self.parent_thread.is_alive()
         ):
+            assert self.loop_rate < self.sound_output.audio_per_packet
+
             if (
                 last_ping + PYMUMBLE_PING_DELAY <= time.time()
             ):  # when it is time, send the ping
