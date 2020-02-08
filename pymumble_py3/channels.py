@@ -2,7 +2,7 @@
 import typing
 from threading import Lock
 
-from . import messages
+from . import messages, mumble_pb2
 from .callbacks import CallBacks
 from .constants import *
 from .errors import ImageTooBigError, TextTooLongError, UnknownChannelError
@@ -10,8 +10,6 @@ from .users import User
 
 if typing.TYPE_CHECKING:
     from .mumble import Mumble
-
-ProtoMessage = typing.Any
 
 
 class Channels(typing.Dict[int, "Channel"]):
@@ -25,7 +23,7 @@ class Channels(typing.Dict[int, "Channel"]):
 
         self.lock = Lock()
 
-    def update(self, message: ProtoMessage) -> None:  # type: ignore
+    def update(self, message: mumble_pb2.ChannelState) -> None:  # type: ignore
         """Update the channel information based on an incoming message"""
         self.lock.acquire()
 
@@ -133,7 +131,9 @@ class Channel(typing.Dict[str, typing.Any]):
     Stores information about one specific channel
     """
 
-    def __init__(self, mumble_object: "Mumble", message: ProtoMessage) -> None:
+    def __init__(
+        self, mumble_object: "Mumble", message: mumble_pb2.ChannelState
+    ) -> None:
         self.mumble_object = mumble_object
         self["channel_id"] = message.channel_id
         self.update(message)
@@ -145,7 +145,7 @@ class Channel(typing.Dict[str, typing.Any]):
                 users.append(user)
         return users
 
-    def update(self, message: ProtoMessage) -> typing.Dict[str, typing.Any]:  # type: ignore
+    def update(self, message: mumble_pb2.ChannelState) -> typing.Dict[str, typing.Any]:  # type: ignore
         """Update a channel based on an incoming message"""
         actions = dict()
 

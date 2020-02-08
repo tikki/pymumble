@@ -10,8 +10,6 @@ from .errors import ImageTooBigError, TextTooLongError
 if typing.TYPE_CHECKING:
     from .mumble import Mumble
 
-ProtoMessage = typing.Any
-
 
 class Users(typing.Dict[int, "User"]):
     """Object that stores and update all connected users"""
@@ -28,7 +26,7 @@ class Users(typing.Dict[int, "User"]):
         ] = None  # session number of the pymumble thread itself
         self.lock = Lock()
 
-    def update(self, message: ProtoMessage) -> None:  # type: ignore
+    def update(self, message: mumble_pb2.UserState) -> None:  # type: ignore
         """Update a user information, based on the incoming message"""
         self.lock.acquire()
 
@@ -43,7 +41,7 @@ class Users(typing.Dict[int, "User"]):
 
         self.lock.release()
 
-    def remove(self, message: ProtoMessage) -> None:
+    def remove(self, message: mumble_pb2.UserRemove) -> None:
         """Remove a user object based on server info"""
         self.lock.acquire()
 
@@ -68,7 +66,7 @@ class Users(typing.Dict[int, "User"]):
 class User(typing.Dict[str, typing.Any]):
     """Object that store one user"""
 
-    def __init__(self, mumble_object: "Mumble", message: ProtoMessage):
+    def __init__(self, mumble_object: "Mumble", message: mumble_pb2.UserState):
         self.mumble_object = mumble_object
         self["session"] = message.session
         self["channel_id"] = 0
@@ -78,7 +76,7 @@ class User(typing.Dict[str, typing.Any]):
             self.mumble_object
         )  # will hold this user incoming audio
 
-    def update(self, message: ProtoMessage) -> typing.Dict[str, typing.Any]:  # type: ignore
+    def update(self, message: mumble_pb2.UserState) -> typing.Dict[str, typing.Any]:  # type: ignore
         """Update user state, based on an incoming message"""
         actions = dict()
 

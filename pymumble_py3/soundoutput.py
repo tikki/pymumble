@@ -11,12 +11,11 @@ import opuslib
 from .constants import *
 from .errors import CodecNotSupportedError
 from .messages import VoiceTarget
+from .mumble_pb2 import CodecVersion
 from .tools import VarInt
 
 if typing.TYPE_CHECKING:
     from .mumble import Mumble
-
-ProtoMessage = typing.Any
 
 
 class SoundOutput:
@@ -44,7 +43,7 @@ class SoundOutput:
         self.lock = threading.Lock()
 
         self.codec: typing.Optional[
-            ProtoMessage
+            CodecVersion
         ] = None  # codec currently requested by the server
         self.encoder: typing.Optional[
             opuslib.Encoder
@@ -246,7 +245,7 @@ class SoundOutput:
         """return the size of the unsent buffer in sec"""
         return sum(len(chunk) for chunk in self.pcm) / 2.0 / PYMUMBLE_SAMPLERATE
 
-    def set_default_codec(self, codecversion: ProtoMessage) -> None:
+    def set_default_codec(self, codecversion: CodecVersion) -> None:
         """Set the default codec to be used to send packets"""
         self.codec = codecversion
         self.create_encoder()

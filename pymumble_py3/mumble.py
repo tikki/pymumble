@@ -8,6 +8,8 @@ import threading
 import time
 import typing
 
+from google.protobuf.message import Message as ProtoMessage
+
 from . import (
     blobs,
     callbacks,
@@ -21,8 +23,6 @@ from . import (
 )
 from .constants import *
 from .errors import *
-
-ProtoMessage = typing.Any
 
 
 class Mumble(threading.Thread):
@@ -85,7 +85,7 @@ class Mumble(threading.Thread):
         self.certfile = certfile
         self.keyfile = keyfile
         self.reconnect = reconnect
-        self.ping_stats = {
+        self.ping_stats: typing.Dict[str, typing.Union[int, float]] = {
             "last_rcv": 0,
             "time_send": 0,
             "nb": 0,
@@ -286,7 +286,7 @@ class Mumble(threading.Thread):
         ping.timestamp = int(time.time())
         ping.tcp_ping_avg = self.ping_stats["avg"]
         ping.tcp_ping_var = self.ping_stats["var"]
-        ping.tcp_packets = self.ping_stats["nb"]
+        ping.tcp_packets = typing.cast(int, self.ping_stats["nb"])
 
         self.Log.debug("sending: ping: %s", ping)
         self.send_message(PYMUMBLE_MSG_TYPES_PING, ping)
@@ -298,7 +298,7 @@ class Mumble(threading.Thread):
             self.Log.debug("Ping too long ! Disconnected ?")
             self.connected = PYMUMBLE_CONN_STATE_NOT_CONNECTED
 
-    def ping_response(self, mess: ProtoMessage) -> None:
+    def ping_response(self, mess: mumble_pb2.Ping) -> None:
         self.ping_stats["last_rcv"] = int(time.time() * 1000)
         ping = int(time.time() * 1000) - self.ping_stats["time_send"]
         old_avg = self.ping_stats["avg"]
@@ -367,30 +367,27 @@ class Mumble(threading.Thread):
     def dispatch_control_message(self, type: int, message: bytes) -> None:
         """Dispatch control messages based on their type"""
         self.Log.debug("dispatch control message")
+        mess: typing.Optional[ProtoMessage] = None
         if (
             type == PYMUMBLE_MSG_TYPES_UDPTUNNEL
         ):  # audio encapsulated in control message
             self.sound_received(message)
 
         elif type == PYMUMBLE_MSG_TYPES_VERSION:
-            mess = mumble_pb2.Version()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.Version.FromString(message)
             self.Log.debug("message: Version : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_AUTHENTICATE:
-            mess = mumble_pb2.Authenticate()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.Authenticate.FromString(message)
             self.Log.debug("message: Authenticate : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_PING:
-            mess = mumble_pb2.Ping()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.Ping.FromString(message)
             self.Log.debug("message: Ping : %s", mess)
             self.ping_response(mess)
 
         elif type == PYMUMBLE_MSG_TYPES_REJECT:
-            mess = mumble_pb2.Reject()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.Reject.FromString(message)
             self.Log.debug("message: reject : %s", mess)
             self.connected = PYMUMBLE_CONN_STATE_FAILED
             self.ready_lock.release()
@@ -399,8 +396,7 @@ class Mumble(threading.Thread):
         elif (
             type == PYMUMBLE_MSG_TYPES_SERVERSYNC
         ):  # this message finish the connection process
-            mess = mumble_pb2.ServerSync()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ServerSync.FromString(message)
             self.Log.debug("message: serversync : %s", mess)
             self.users.set_myself(mess.session)
             self.server_max_bandwidth = mess.max_bandwidth
@@ -412,113 +408,94 @@ class Mumble(threading.Thread):
                 self.ready_lock.release()  # release the ready-lock
 
         elif type == PYMUMBLE_MSG_TYPES_CHANNELREMOVE:
-            mess = mumble_pb2.ChannelRemove()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ChannelRemove.FromString(message)
             self.Log.debug("message: ChannelRemove : %s", mess)
 
             self.channels.remove(mess.channel_id)
 
         elif type == PYMUMBLE_MSG_TYPES_CHANNELSTATE:
-            mess = mumble_pb2.ChannelState()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ChannelState.FromString(message)
             self.Log.debug("message: channelstate : %s", mess)
 
             self.channels.update(mess)
 
         elif type == PYMUMBLE_MSG_TYPES_USERREMOVE:
-            mess = mumble_pb2.UserRemove()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.UserRemove.FromString(message)
             self.Log.debug("message: UserRemove : %s", mess)
 
             self.users.remove(mess)
 
         elif type == PYMUMBLE_MSG_TYPES_USERSTATE:
-            mess = mumble_pb2.UserState()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.UserState.FromString(message)
             self.Log.debug("message: userstate : %s", mess)
 
             self.users.update(mess)
 
         elif type == PYMUMBLE_MSG_TYPES_BANLIST:
-            mess = mumble_pb2.BanList()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.BanList.FromString(message)
             self.Log.debug("message: BanList : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_TEXTMESSAGE:
-            mess = mumble_pb2.TextMessage()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.TextMessage.FromString(message)
             self.Log.debug("message: TextMessage : %s", mess)
 
             self.callbacks(PYMUMBLE_CLBK_TEXTMESSAGERECEIVED, mess)
 
         elif type == PYMUMBLE_MSG_TYPES_PERMISSIONDENIED:
-            mess = mumble_pb2.PermissionDenied()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.PermissionDenied.FromString(message)
             self.Log.debug("message: PermissionDenied : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_ACL:
-            mess = mumble_pb2.ACL()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ACL.FromString(message)
             self.Log.debug("message: ACL : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_QUERYUSERS:
-            mess = mumble_pb2.QueryUsers()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.QueryUsers.FromString(message)
             self.Log.debug("message: QueryUsers : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_CRYPTSETUP:
-            mess = mumble_pb2.CryptSetup()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.CryptSetup.FromString(message)
             self.Log.debug("message: CryptSetup : %s", mess)
             self.ping()
 
         elif type == PYMUMBLE_MSG_TYPES_CONTEXTACTIONMODIFY:
-            mess = mumble_pb2.ContextActionModify()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ContextActionModify.FromString(message)
             self.Log.debug("message: ContextActionModify : %s", mess)
 
             self.callbacks(PYMUMBLE_CLBK_CONTEXTACTIONRECEIVED, mess)
 
         elif type == PYMUMBLE_MSG_TYPES_CONTEXTACTION:
-            mess = mumble_pb2.ContextAction()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ContextAction.FromString(message)
             self.Log.debug("message: ContextAction : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_USERLIST:
-            mess = mumble_pb2.UserList()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.UserList.FromString(message)
             self.Log.debug("message: UserList : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_VOICETARGET:
-            mess = mumble_pb2.VoiceTarget()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.VoiceTarget.FromString(message)
             self.Log.debug("message: VoiceTarget : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_PERMISSIONQUERY:
-            mess = mumble_pb2.PermissionQuery()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.PermissionQuery.FromString(message)
             self.Log.debug("message: PermissionQuery : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_CODECVERSION:
-            mess = mumble_pb2.CodecVersion()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.CodecVersion.FromString(message)
             self.Log.debug("message: CodecVersion : %s", mess)
 
             self.sound_output.set_default_codec(mess)
 
         elif type == PYMUMBLE_MSG_TYPES_USERSTATS:
-            mess = mumble_pb2.UserStats()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.UserStats.FromString(message)
             self.Log.debug("message: UserStats : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_REQUESTBLOB:
-            mess = mumble_pb2.RequestBlob()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.RequestBlob.FromString(message)
             self.Log.debug("message: RequestBlob : %s", mess)
 
         elif type == PYMUMBLE_MSG_TYPES_SERVERCONFIG:
-            mess = mumble_pb2.ServerConfig()
-            mess.ParseFromString(message)
+            mess = mumble_pb2.ServerConfig.FromString(message)
             self.Log.debug("message: ServerConfig : %s", mess)
             for line in str(mess).split("\n"):
                 items = line.split(":")
@@ -708,17 +685,17 @@ class Mumble(threading.Thread):
             cmd.response = True
             self.commands.answer(cmd)
         elif cmd.cmd == PYMUMBLE_CMD_TEXTMESSAGE:
-            textmessage = mumble_pb2.TextMessage()
+            textmessage = mumble_pb2.TextMessage(message=cmd.parameters["message"])
             textmessage.session.append(cmd.parameters["session"])
             textmessage.channel_id.append(cmd.parameters["channel_id"])
-            textmessage.message = cmd.parameters["message"]
             self.send_message(PYMUMBLE_MSG_TYPES_TEXTMESSAGE, textmessage)
             cmd.response = True
             self.commands.answer(cmd)
         elif cmd.cmd == PYMUMBLE_CMD_TEXTPRIVATEMESSAGE:
-            textprivatemessage = mumble_pb2.TextMessage()
+            textprivatemessage = mumble_pb2.TextMessage(
+                message=cmd.parameters["message"]
+            )
             textprivatemessage.session.append(cmd.parameters["session"])
-            textprivatemessage.message = cmd.parameters["message"]
             self.send_message(PYMUMBLE_MSG_TYPES_TEXTMESSAGE, textprivatemessage)
             cmd.response = True
             self.commands.answer(cmd)
@@ -731,8 +708,9 @@ class Mumble(threading.Thread):
             cmd.response = True
             self.commands.answer(cmd)
         elif cmd.cmd == PYMUMBLE_MSG_TYPES_CHANNELREMOVE:
-            channelremove = mumble_pb2.ChannelRemove()
-            channelremove.channel_id = cmd.parameters["channel_id"]
+            channelremove = mumble_pb2.ChannelRemove(
+                channel_id=cmd.parameters["channel_id"]
+            )
             self.send_message(PYMUMBLE_MSG_TYPES_CHANNELREMOVE, channelremove)
             cmd.response = True
             self.commands.answer(cmd)
@@ -741,12 +719,12 @@ class Mumble(threading.Thread):
             textvoicetarget.id = cmd.parameters["id"]
             targets = []
             if cmd.parameters["id"] == 1:
-                voicetarget = mumble_pb2.VoiceTarget.Target()  # type: ignore
+                voicetarget = mumble_pb2.VoiceTarget.Target()
                 voicetarget.channel_id = cmd.parameters["targets"][0]
                 targets.append(voicetarget)
             else:
                 for target in cmd.parameters["targets"]:
-                    voicetarget = mumble_pb2.VoiceTarget.Target()  # type: ignore
+                    voicetarget = mumble_pb2.VoiceTarget.Target()
                     voicetarget.session.append(target)
                     targets.append(voicetarget)
             textvoicetarget.targets.extend(targets)
