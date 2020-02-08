@@ -11,6 +11,8 @@ from .constants import *
 if typing.TYPE_CHECKING:
     from .mumble import Mumble
 
+bytes_per_sample: int = PYMUMBLE_SAMPLESIZE // 8
+
 
 class SoundQueue:
     """
@@ -149,13 +151,15 @@ class SoundChunk:
         self.pcm = pcm  # audio data
         self.sequence = sequence  # sequence of the packet
         self.size = size  # size
-        self.duration = float(size) / 2 / PYMUMBLE_SAMPLERATE  # duration in sec
+        self.duration = (
+            float(size) / bytes_per_sample / PYMUMBLE_SAMPLERATE
+        )  # duration in sec
         self.type = type  # type of the audio (codec)
         self.target = target  # target of the audio
 
     def extract_sound(self, duration: float) -> "SoundChunk":
         """Extract part of the chunk, leaving a valid chunk for the remaining part"""
-        size = int(duration * 2 * PYMUMBLE_SAMPLERATE)
+        size = int(duration * bytes_per_sample * PYMUMBLE_SAMPLERATE)
         result = SoundChunk(
             self.pcm[:size],
             self.sequence,

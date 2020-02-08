@@ -17,6 +17,8 @@ from .tools import VarInt
 if typing.TYPE_CHECKING:
     from .mumble import Mumble
 
+bytes_per_sample: int = PYMUMBLE_SAMPLESIZE // 8
+
 
 class SoundOutput:
     """
@@ -76,9 +78,10 @@ class SoundOutput:
         assert self.codec_type is not None
         assert self.mumble_object.control_socket is not None
 
-        samples = int(
-            self.encoder_framesize * PYMUMBLE_SAMPLERATE * 2
-        )  # number of samples in an encoder frame
+        samples_per_chunk = int(self.encoder_framesize * PYMUMBLE_SAMPLERATE)
+        bytes_per_chunk = (
+            samples_per_chunk * bytes_per_sample
+        )  # number of bytes in an encoder frame
 
         while (
             len(self.pcm) > 0
@@ -122,13 +125,14 @@ class SoundOutput:
                 self.lock.release()
 
                 if (
-                    len(to_encode) != samples
+                    len(to_encode) != bytes_per_chunk
                 ):  # pad to_encode if needed to match sample length
-                    to_encode += b"\x00" * (samples - len(to_encode))
+                    to_encode += b"\x00" * (bytes_per_chunk - len(to_encode))
 
                 try:
-                    encoded = self.encoder.encode(to_encode, len(to_encode) // 2)
-                except opuslib.OpusError:
+                    encoded = self.encoder.encode(to_encode, samples_per_chunk)
+                except opuslib.OpusError as err:
+                    self.Log.debug(f"error while encoding chunk to Opus: {err.code}")
                     encoded = b""
 
                 audio_encoded += self.encoder_framesize
@@ -216,14 +220,17 @@ class SoundOutput:
 
     def add_sound(self, pcm: bytes) -> None:
         """add sound to be sent (in PCM mono 16 bits signed format)"""
-        if len(pcm) % 2 != 0:  # check that the data is align on 16 bits
-            raise Exception("pcm data must be mono 16 bits")
+        if (
+            len(pcm) % (bytes_per_sample * PYMUMBLE_CHANNELS) != 0
+        ):  # check that the data is properly aligned
+            channels = {1: "mono", 2: "stereo"}[PYMUMBLE_CHANNELS]
+            raise Exception(f"PCM data must be {PYMUMBLE_SAMPLESIZE} bits, {channels}")
 
         if self.encoder_framesize is None:
             raise Exception("encoder not initialized")
 
         samples = int(
-            self.encoder_framesize * PYMUMBLE_SAMPLERATE * 2
+            self.encoder_framesize * PYMUMBLE_SAMPLERATE * bytes_per_sample
         )  # number of samples in an encoder frame
 
         self.lock.acquire()
@@ -243,7 +250,11 @@ class SoundOutput:
 
     def get_buffer_size(self) -> float:
         """return the size of the unsent buffer in sec"""
-        return sum(len(chunk) for chunk in self.pcm) / 2.0 / PYMUMBLE_SAMPLERATE
+        return (
+            sum(len(chunk) for chunk in self.pcm)
+            / bytes_per_sample
+            / PYMUMBLE_SAMPLERATE
+        )
 
     def set_default_codec(self, codecversion: CodecVersion) -> None:
         """Set the default codec to be used to send packets"""

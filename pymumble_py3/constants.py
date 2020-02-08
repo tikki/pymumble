@@ -28,8 +28,9 @@ PYMUMBLE_OS_VERSION_STRING = "Python %s - %s %s" % (
 
 PYMUMBLE_PING_DELAY = 10  # interval between 2 pings in sec
 
-PYMUMBLE_SAMPLERATE = 48000  # in hz
-PYMUMBLE_CHANNELS = 1  # channel count
+PYMUMBLE_SAMPLERATE = 48000  # in Hz, Opus internally uses 48 kHz
+PYMUMBLE_SAMPLESIZE = 16  # in bits, required to be 16 for opuslib.encode
+PYMUMBLE_CHANNELS = 1  # number of channels, Opus only supports mono or stereo
 
 PYMUMBLE_SEQUENCE_DURATION = float(10) / 1000  # in sec
 PYMUMBLE_SEQUENCE_RESET_INTERVAL = 5  # in sec
