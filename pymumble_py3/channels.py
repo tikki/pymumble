@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from .constants import *
 from threading import Lock
-from .errors import UnknownChannelError, TextTooLongError, ImageTooBigError
+
 from . import messages
+from .constants import *
+from .errors import ImageTooBigError, TextTooLongError, UnknownChannelError
 
 
 class Channels(dict):
@@ -25,7 +26,9 @@ class Channels(dict):
             self.callbacks(PYMUMBLE_CLBK_CHANNELCREATED, self[message.channel_id])
         else:  # update the channel
             actions = self[message.channel_id].update(message)
-            self.callbacks(PYMUMBLE_CLBK_CHANNELUPDATED, self[message.channel_id], actions)
+            self.callbacks(
+                PYMUMBLE_CLBK_CHANNELUPDATED, self[message.channel_id], actions
+            )
 
         self.lock.release()
 
@@ -42,7 +45,7 @@ class Channels(dict):
 
     def find_by_tree(self, tree):
         """Find a channel by its full path (a list with an element for each leaf)"""
-        if not getattr(tree, '__iter__', False):
+        if not getattr(tree, "__iter__", False):
             tree = tree  # function use argument as a list
 
         current = self[0]
@@ -66,7 +69,7 @@ class Channels(dict):
         childs = list()
 
         for item in self.values():
-            if item.get('parent') and item["parent"] == channel["channel_id"]:
+            if item.get("parent") and item["parent"] == channel["channel_id"]:
                 childs.append(item)
 
         return childs
@@ -142,11 +145,15 @@ class Channel(dict):
             actions.update(self.update_field(field.name, value))
 
         if message.HasField("description_hash"):
-            actions.update(self.update_field("description_hash", message.description_hash))
+            actions.update(
+                self.update_field("description_hash", message.description_hash)
+            )
             if message.HasField("description"):
                 self.mumble_object.blobs[message.description_hash] = message.description
             else:
-                self.mumble_object.blobs.get_channel_description(message.description_hash)
+                self.mumble_object.blobs.get_channel_description(
+                    message.description_hash
+                )
 
         return actions  # return a dict with updates performed, useful for the callback functions
 

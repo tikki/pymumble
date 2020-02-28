@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from .constants import *
-from .errors import TextTooLongError, ImageTooBigError
 from threading import Lock
-from . import soundqueue
-from . import messages
-from . import mumble_pb2
+
+from . import messages, mumble_pb2, soundqueue
+from .constants import *
+from .errors import ImageTooBigError, TextTooLongError
+
 
 class Users(dict):
     """Object that stores and update all connected users"""
@@ -63,7 +63,9 @@ class User(dict):
         self["channel_id"] = 0
         self.update(message)
 
-        self.sound = soundqueue.SoundQueue(self.mumble_object)  # will hold this user incoming audio
+        self.sound = soundqueue.SoundQueue(
+            self.mumble_object
+        )  # will hold this user incoming audio
 
     def update(self, message):
         """Update user state, based on an incoming message"""
@@ -155,57 +157,50 @@ class User(dict):
 
     def suppress(self):
         """Disable a user"""
-        params = {"session": self["session"],
-                  "suppress": True}
+        params = {"session": self["session"], "suppress": True}
 
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
 
     def unsuppress(self):
         """Enable a user"""
-        params = {"session": self["session"],
-                  "suppress": False}
+        params = {"session": self["session"], "suppress": False}
 
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
 
     def recording(self):
         """Set the user as recording"""
-        params = {"session": self["session"],
-                  "recording": True}
+        params = {"session": self["session"], "recording": True}
 
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
 
     def unrecording(self):
         """Set the user as not recording"""
-        params = {"session": self["session"],
-                  "recording": False}
+        params = {"session": self["session"], "recording": False}
 
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
 
     def comment(self, comment):
         """Set the user comment"""
-        params = {"session": self["session"],
-                  "comment": comment}
+        params = {"session": self["session"], "comment": comment}
 
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
 
     def texture(self, texture):
         """Set the user texture"""
-        params = {"session": self["session"],
-                  "texture": texture}
+        params = {"session": self["session"], "texture": texture}
 
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
-    
+
     def register(self):
         """Register the user (mostly for myself)"""
-        params = {"session": self["session"],
-                  "user_id": 0}
- 
+        params = {"session": self["session"], "user_id": 0}
+
         cmd = messages.ModUserState(self.mumble_object.users.myself_session, params)
         self.mumble_object.execute_command(cmd)
 
@@ -218,7 +213,9 @@ class User(dict):
             authenticate.tokens.extend([token])
             authenticate.opus = True
             self.mumble_object.Log.debug("sending: authenticate: %s", authenticate)
-            self.mumble_object.send_message(PYMUMBLE_MSG_TYPES_AUTHENTICATE, authenticate)
+            self.mumble_object.send_message(
+                PYMUMBLE_MSG_TYPES_AUTHENTICATE, authenticate
+            )
 
         session = self.mumble_object.users.myself_session
         cmd = messages.MoveCmd(session, channel_id)

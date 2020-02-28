@@ -2,8 +2,9 @@
 # This bot sends any sound it receives back to where it has come from.
 # WARNING! Don't put two bots in the same place!
 
-import pymumble_py3
 import time
+
+import pymumble_py3
 from pymumble_py3.callbacks import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
 
 pwd = ""  # password

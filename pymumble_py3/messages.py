@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from .constants import *
 from threading import Lock
+
+from .constants import *
 
 
 class Cmd:
@@ -25,8 +26,7 @@ class MoveCmd(Cmd):
         Cmd.__init__(self)
 
         self.cmd = PYMUMBLE_CMD_MOVE
-        self.parameters = {"session": session,
-                           "channel_id": channel_id}
+        self.parameters = {"session": session, "channel_id": channel_id}
 
 
 class TextMessage(Cmd):
@@ -36,9 +36,11 @@ class TextMessage(Cmd):
         Cmd.__init__(self)
 
         self.cmd = PYMUMBLE_CMD_TEXTMESSAGE
-        self.parameters = {"session": session,
-                           "channel_id": channel_id,
-                           "message": message}
+        self.parameters = {
+            "session": session,
+            "channel_id": channel_id,
+            "message": message,
+        }
 
 
 class TextPrivateMessage(Cmd):
@@ -48,8 +50,7 @@ class TextPrivateMessage(Cmd):
         Cmd.__init__(self)
 
         self.cmd = PYMUMBLE_CMD_TEXTPRIVATEMESSAGE
-        self.parameters = {"session": session,
-                           "message": message}
+        self.parameters = {"session": session, "message": message}
 
 
 class ModUserState(Cmd):
@@ -69,9 +70,8 @@ class CreateChannel(Cmd):
         Cmd.__init__(self)
 
         self.cmd = PYMUMBLE_MSG_TYPES_CHANNELSTATE
-        self.parameters = {"parent": parent,
-                           "name": name,
-                           "temporary": temporary}
+        self.parameters = {"parent": parent, "name": name, "temporary": temporary}
+
 
 class RemoveChannel(Cmd):
     """Command to create channel"""
@@ -90,5 +90,4 @@ class VoiceTarget(Cmd):
         Cmd.__init__(self)
 
         self.cmd = PYMUMBLE_MSG_TYPES_VOICETARGET
-        self.parameters = {"id": voice_id,
-                           "targets": targets}
+        self.parameters = {"id": voice_id, "targets": targets}
